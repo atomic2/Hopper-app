@@ -548,7 +548,11 @@
             syncToGitHub(); 
             populateUserDropdown();
             switchLoginTab('login');
-            alert(`✅ Account created for ${rawName}.`);
+            
+            // DELAY: Gives the browser time to visually render the dropdown before freezing the screen
+            setTimeout(() => {
+                alert(`✅ Account created for ${rawName}.`);
+            }, 150);
         }
 
         function processLogin() {
