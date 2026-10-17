@@ -459,7 +459,8 @@
             }
         }
 
-        async function syncToGitHub() {
+        // FETCH-MERGE-PUSH Engine with automatic retry loop to prevent intermittent dropouts
+        async function syncToGitHub(retries = 2) {
             if (isViewerMode) return;
             saveLocally(); 
             
@@ -524,11 +525,18 @@
                     userRecords = mergedRecords;
                     saveLocally();
                     updateSyncStatus("✅ Cloud Synced");
+                } else if (retries > 0) {
+                    // RETRY ENGINE: If GitHub rejects it due to a micro-collision, wait 1.5 seconds and try again automatically!
+                    setTimeout(() => syncToGitHub(retries - 1), 1500);
                 } else {
                     updateSyncStatus("❌ Sync Failed");
                 }
             } catch (err) {
-                updateSyncStatus("⚠️ Offline");
+                if (retries > 0) {
+                    setTimeout(() => syncToGitHub(retries - 1), 1500);
+                } else {
+                    updateSyncStatus("⚠️ Offline");
+                }
             }
         }
 
@@ -735,7 +743,6 @@
             isViewerMode = false;
             shiftRecord = null;
             
-            // WIPE PASSWORD FIELD AND RESET DROPDOWN
             document.getElementById('login-pin').value = '';
             document.getElementById('login-name').value = '';
             
@@ -745,7 +752,6 @@
             document.getElementById('btn-unlock').innerText = "UNLOCK TRACKER";
             document.getElementById('btn-unlock').disabled = false;
 
-            // Re-run sync to instantly update the connection badge from offline to online
             syncFromGitHub();
         }
 
