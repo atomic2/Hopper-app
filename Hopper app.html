@@ -235,7 +235,7 @@
                  <span style="color: #bdc3c7;" id="role-label">OPERATOR:</span> 
                  <span id="display-user"></span> 
                  <span id="syncStatusIndicator" style="font-size: 0.75rem; color: #f1c40f; margin-left: 10px; font-weight: bold;"></span>
-                <button class="logout-btn" onclick="processLogout()">LOGOUT</button>
+                <button class="logout-btn" onclick="processLogout(false, false)">LOGOUT</button>
             </div>
         </div>
 
@@ -459,7 +459,6 @@
             }
         }
 
-        // FETCH-MERGE-PUSH Engine to support multi-device isolated user accounts safely
         async function syncToGitHub() {
             if (isViewerMode) return;
             saveLocally(); 
@@ -485,7 +484,6 @@
 
                     mergedUsers = { ...parsed.users, ...storedUsers };
                     
-                    // Merge communication board messages
                     const allMsgs = [...(parsed.messages || []), ...storedMessages];
                     const uniqueMsgs = [];
                     const msgSet = new Set();
@@ -496,7 +494,6 @@
                     uniqueMsgs.sort((a,b) => b.timestamp - a.timestamp);
                     mergedMessages = uniqueMsgs;
 
-                    // Merge user records independently so Operator A and Operator B don't clash
                     const cloudRecords = parsed.userRecords || {};
                     for (let u in cloudRecords) {
                         if (u !== shiftRecord.currentUser) {
@@ -539,9 +536,7 @@
             isViewerMode = true;
             document.getElementById('role-label').innerText = "MODE:";
             
-            // Find most recently updated profile to display
             let activeTargetName = "NO ACTIVE SHIFT";
-            let latestTime = 0;
             
             for (let u in userRecords) {
                 if (userRecords[u].currentUser) {
@@ -578,6 +573,7 @@
                 } else if (document.getElementById('hoppers-view').style.display === 'block' && shiftRecord.uiState.blendersMode === 'single') {
                     renderSingleBlender(currentBlender);
                 }
+                
             }, 15000); 
         }
 
@@ -622,7 +618,6 @@
         }
 
         function finishLogin(newProfile) {
-            // STRICT CLEAN SLATE RULE: Every time an operator logs in, they get a fresh, blank sheet.
             userRecords[newProfile] = getFreshShiftRecord(newProfile);
             shiftRecord = userRecords[newProfile];
             
@@ -728,7 +723,6 @@
 
             if (syncInterval) clearInterval(syncInterval);
             
-            // Clean slate wipe on explicit logout
             if (shiftRecord && shiftRecord.currentUser && !isViewerMode) {
                 userRecords[shiftRecord.currentUser] = getFreshShiftRecord(shiftRecord.currentUser);
             }
@@ -740,11 +734,19 @@
             document.getElementById('login-screen').style.display = 'flex'; 
             isViewerMode = false;
             shiftRecord = null;
+            
+            // WIPE PASSWORD FIELD AND RESET DROPDOWN
+            document.getElementById('login-pin').value = '';
+            document.getElementById('login-name').value = '';
+            
             localStorage.removeItem('ralstonActiveUser_hopper');
             populateUserDropdown(); 
             
             document.getElementById('btn-unlock').innerText = "UNLOCK TRACKER";
             document.getElementById('btn-unlock').disabled = false;
+
+            // Re-run sync to instantly update the connection badge from offline to online
+            syncFromGitHub();
         }
 
         function cleanOldMessages() { 
@@ -1029,7 +1031,7 @@
 
             setups.forEach((setupData, index) => {
                 html += `<div class="order-card" style="border-left:5px solid #9b59b6; padding:0; overflow:hidden; margin-bottom:20px;">
-                            <h4 style="padding: 15px; background: #ecf0f1; margin: 0; color: #2c3e50; border-bottom: 1px solid #bdc3c7;">BLENDER ${blenderNum} - SETUP ${index + 1}</h4>
+                            <h4 style="padding: 15px; background: #ecf0f1; margin: 0; color: #2c3e50; border-bottom: 2px solid #bdc3c7;">BLENDER ${blenderNum} - SETUP ${index + 1}</h4>
                             <table class="blender-table">
                             <thead><tr><th style="width:70%;">SOURCE</th><th style="width:30%;">%</th></tr></thead>
                             <tbody>`;
@@ -1440,7 +1442,6 @@
             const activeUser = localStorage.getItem('ralstonActiveUser_hopper');
             if (activeUser && userRecords[activeUser]) {
                  shiftRecord = userRecords[activeUser];
-                 cloudActiveUser = activeUser; 
                  document.getElementById('role-label').innerText = "OPERATOR:";
                  document.getElementById('display-user').innerText = shiftRecord.currentUser; 
                  document.getElementById('pdf-btn').style.display = 'block';
