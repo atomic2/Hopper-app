@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Production Material Tracker</title>
     
+    <!-- PWA Standalone App Tags -->
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Hopper Report">
     <meta name="theme-color" content="#2c3e50">
     <link rel="manifest" href='data:application/manifest+json,{"name":"Production Material Tracker","short_name":"HopperReport","start_url":".","display":"standalone","background_color":"#f4f7f6","theme_color":"#2c3e50","icons":[{"src":"https://cdn-icons-png.flaticon.com/512/3652/3652191.png","sizes":"512x512","type":"image/png"}]}'>
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3652/3652191.png">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
@@ -19,14 +21,10 @@
         /* --- LOGIN SCREEN --- */
         #login-screen, #admin-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(44, 62, 80, 0.95); z-index: 10000; display: flex; justify-content: center; align-items: center; }
         #admin-screen { z-index: 10001; }
-        .login-box { background: white; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 400px; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); width: 100%; max-width: 420px; }
         .login-box h2 { margin-top: 0; color: #2c3e50; margin-bottom: 20px; font-size: 24px;}
         
-        .login-tab-container { display: flex; margin-bottom: 20px; border-radius: 6px; overflow: hidden; border: 2px solid #bdc3c7; }
-        .login-tab { flex: 1; padding: 12px; background: #ecf0f1; border: none; cursor: pointer; font-weight: bold; font-size: 16px; color: #7f8c8d; transition: 0.2s; }
-        .login-tab.active { background: #3498db; color: white; }
-
-        .login-input { width: 100%; padding: 15px; margin-bottom: 20px; border: 2px solid #bdc3c7; border-radius: 6px; font-size: 18px; box-sizing: border-box; text-align: center; outline: none; }
+        .login-input { width: 100%; padding: 15px; margin-bottom: 15px; border: 2px solid #bdc3c7; border-radius: 6px; font-size: 18px; box-sizing: border-box; text-align: center; outline: none; }
         select.login-input { appearance: auto; cursor: pointer; }
 
         .login-btn { background: #27ae60; color: white; border: none; width: 100%; padding: 15px; font-size: 20px; font-weight: bold; border-radius: 6px; cursor: pointer; margin-bottom: 10px; transition: 0.2s; }
@@ -185,34 +183,15 @@
     <div id="login-screen">
         <div class="login-box">
             <h2>OPERATOR ACCESS</h2>
-            <div id="sync-status-badge" style="font-size: 13px; font-weight: bold; margin-bottom: 15px; color: #7f8c8d;">☁️ CLOUD SYNC: INITIALIZING...</div>
-            
-            <div class="login-tab-container">
-                <button id="tab-login" class="login-tab active" onclick="switchLoginTab('login')">LOG IN</button>
-                <button id="tab-create" class="login-tab" onclick="switchLoginTab('create')">NEW USER</button>
-            </div>
+            <div id="sync-status-badge" style="font-size: 13px; font-weight: bold; margin-bottom: 20px; color: #7f8c8d;">☁️ CLOUD SYNC: INITIALIZING...</div>
             
             <div id="login-view">
                 <select id="login-name" class="login-input"><option value="">WAITING FOR CLOUD SYNC...</option></select>
                 <input type="password" id="login-pin" class="login-input" placeholder="ENTER YOUR PIN" autocomplete="new-password">
                 <button id="btn-unlock" class="login-btn" onclick="processLogin()" disabled>WAITING FOR SYNC...</button>
                 <button id="btn-viewer" class="viewer-btn" onclick="enterViewerMode()" disabled>👀 ENTER AS VIEWER</button>
-                <button class="viewer-btn" style="background: #34495e; margin-top: 10px;" onclick="downloadNetworkFile()">💾 DOWNLOAD GITHUB KICKSTART FILE</button>
             </div>
             
-            <div id="create-view" style="display: none;">
-                <input type="text" id="create-name" class="login-input" placeholder="ENTER FIRST NAME" autocomplete="off">
-                <select id="create-crew" class="login-input">
-                    <option value="">SELECT YOUR CREW...</option>
-                    <option value="A">CREW A</option>
-                    <option value="B">CREW B</option>
-                    <option value="C">CREW C</option>
-                    <option value="D">CREW D</option>
-                    <option value="MANAGEMENT">MANAGEMENT</option>
-                </select>
-                <input type="password" id="create-pin" class="login-input" placeholder="CREATE A 4-DIGIT PIN" autocomplete="new-password">
-                <button id="btn-save" class="login-btn" onclick="createAccount()" disabled>WAITING FOR SYNC...</button>
-            </div>
             <span class="admin-link" onclick="openAdmin()">Administrator Settings</span>
         </div>
     </div>
@@ -220,8 +199,26 @@
     <div id="admin-screen" style="display: none;">
         <div class="login-box" style="max-width: 500px;">
             <h2 style="color: #e74c3c;">ADMIN: MANAGE USERS</h2>
-            <div id="admin-user-list" style="max-height: 350px; overflow-y: auto; margin-bottom: 25px; border: 1px solid #bdc3c7; border-radius: 6px;"></div>
-            <button class="login-btn" style="background: #95a5a6;" onclick="document.getElementById('admin-screen').style.display='none';">CLOSE PANEL</button>
+            
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #bdc3c7;">
+                <h3 style="color: #2c3e50; margin-top: 0; margin-bottom: 15px; font-size: 16px;">+ CREATE NEW OPERATOR</h3>
+                <input type="text" id="create-name" class="login-input" style="padding: 10px;" placeholder="ENTER NAME (e.g. CREW A LEAD)" autocomplete="off">
+                <select id="create-crew" class="login-input" style="padding: 10px;">
+                    <option value="">SELECT CREW...</option>
+                    <option value="A">CREW A</option>
+                    <option value="B">CREW B</option>
+                    <option value="C">CREW C</option>
+                    <option value="D">CREW D</option>
+                    <option value="MANAGEMENT">MANAGEMENT</option>
+                </select>
+                <input type="password" id="create-pin" class="login-input" style="padding: 10px;" placeholder="CREATE 4-DIGIT PIN" autocomplete="new-password">
+                <button id="btn-save" class="login-btn" style="padding: 10px; font-size: 16px; margin-bottom: 0;" onclick="createAccount()">SAVE PROFILE</button>
+            </div>
+
+            <div id="admin-user-list" style="max-height: 250px; overflow-y: auto; margin-bottom: 25px; border: 1px solid #bdc3c7; border-radius: 6px;"></div>
+            
+            <button class="viewer-btn" style="background: #34495e; margin-bottom: 10px; font-size: 14px; padding: 10px;" onclick="downloadNetworkFile()">💾 MANUAL BACKUP / KICKSTART FILE</button>
+            <button class="login-btn" style="background: #95a5a6; padding: 10px;" onclick="document.getElementById('admin-screen').style.display='none';">CLOSE PANEL</button>
         </div>
     </div>
 
@@ -350,10 +347,8 @@
 
         function unlockLoginUI() {
             const btn1 = document.getElementById('btn-unlock');
-            const btn2 = document.getElementById('btn-save');
             const btn3 = document.getElementById('btn-viewer');
             if (btn1) { btn1.disabled = false; btn1.innerText = "UNLOCK TRACKER"; }
-            if (btn2) { btn2.disabled = false; btn2.innerText = "SAVE PROFILE"; }
             if (btn3) { btn3.disabled = false; }
         }
 
@@ -394,12 +389,10 @@
         function checkForNewMessages(incomingMessages) {
             if (incomingMessages.length === 0) return;
             const newest = incomingMessages[0]; 
-            
             if (lastKnownMsgTimestamp === 0) {
                 lastKnownMsgTimestamp = newest.timestamp;
                 return;
             }
-
             if (newest.timestamp > lastKnownMsgTimestamp) {
                 lastKnownMsgTimestamp = newest.timestamp;
                 showPopupNotification(newest.author, newest.text);
@@ -423,19 +416,11 @@
             }
 
             const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}?ref=${GITHUB_CONFIG.branch}`;
-            
             try {
-                const response = await fetch(url, {
-                    headers: { 
-                        "Authorization": `Bearer ${token}`,
-                        "Accept": "application/vnd.github.v3+json"
-                    }
-                });
-
+                const response = await fetch(url, { headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github.v3+json" }});
                 if (response.status === 200) {
                     const fileData = await response.json();
                     currentFileSha = fileData.sha;
-                    
                     const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
                     const parsed = JSON.parse(decodedContent);
 
@@ -444,16 +429,25 @@
 
                     storedUsers = parsed.users || {};
                     storedMessages = incomingMessages;
-                    userRecords = parsed.userRecords || {};
+                    
+                    const incomingRecords = parsed.userRecords || {};
+                    
+                    if (!isViewerMode && shiftRecord) {
+                        for (let u in incomingRecords) {
+                            if (u !== shiftRecord.currentUser) {
+                                userRecords[u] = incomingRecords[u];
+                            }
+                        }
+                    } else {
+                        userRecords = incomingRecords;
+                    }
 
                     saveLocally();
                     populateUserDropdown();
                     cleanOldMessages();
                     updateSyncStatus("✅ Cloud Synced");
 
-                    if (document.getElementById('board-view').style.display === 'block') {
-                        renderMessages();
-                    }
+                    if (document.getElementById('board-view').style.display === 'block') { renderMessages(); }
                 } else if (response.status === 404) {
                     loadLocalFallback();
                     updateSyncStatus("✅ Ready for first push");
@@ -465,6 +459,7 @@
             }
         }
 
+        // FETCH-MERGE-PUSH Engine to support multi-device isolated user accounts safely
         async function syncToGitHub() {
             if (isViewerMode) return;
             saveLocally(); 
@@ -473,39 +468,64 @@
             if (!token) return;
 
             updateSyncStatus("⏳ Pushing...");
-
-            const payload = {
-                users: storedUsers,
-                messages: storedMessages,
-                userRecords: userRecords,
-                lastUpdated: new Date().toISOString()
-            };
-
-            const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
             const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
 
-            const body = {
-                message: `Auto-sync Hopper: ${new Date().toLocaleString()}`,
-                content: contentBase64,
-                branch: GITHUB_CONFIG.branch
-            };
-
-            if (currentFileSha) body.sha = currentFileSha;
-
             try {
-                const response = await fetch(url, {
-                    method: "PUT",
-                    headers: {
-                        "Authorization": `Bearer ${token}`,
-                        "Content-Type": "application/json",
-                        "Accept": "application/vnd.github.v3+json"
-                    },
-                    body: JSON.stringify(body)
-                });
+                let latestSha = currentFileSha;
+                let mergedRecords = { ...userRecords };
+                let mergedMessages = [...storedMessages];
+                let mergedUsers = { ...storedUsers };
+
+                const fetchRes = await fetch(url + `?ref=${GITHUB_CONFIG.branch}`, { headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github.v3+json" }});
+                if (fetchRes.status === 200) {
+                    const fileData = await fetchRes.json();
+                    latestSha = fileData.sha;
+                    const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
+                    const parsed = JSON.parse(decodedContent);
+
+                    mergedUsers = { ...parsed.users, ...storedUsers };
+                    
+                    // Merge communication board messages
+                    const allMsgs = [...(parsed.messages || []), ...storedMessages];
+                    const uniqueMsgs = [];
+                    const msgSet = new Set();
+                    allMsgs.forEach(m => {
+                        const key = m.timestamp + m.author;
+                        if (!msgSet.has(key)) { msgSet.add(key); uniqueMsgs.push(m); }
+                    });
+                    uniqueMsgs.sort((a,b) => b.timestamp - a.timestamp);
+                    mergedMessages = uniqueMsgs;
+
+                    // Merge user records independently so Operator A and Operator B don't clash
+                    const cloudRecords = parsed.userRecords || {};
+                    for (let u in cloudRecords) {
+                        if (u !== shiftRecord.currentUser) {
+                            mergedRecords[u] = cloudRecords[u]; 
+                        }
+                    }
+                    mergedRecords[shiftRecord.currentUser] = shiftRecord;
+                }
+
+                const payload = {
+                    users: mergedUsers,
+                    messages: mergedMessages,
+                    userRecords: mergedRecords,
+                    lastUpdated: new Date().toISOString()
+                };
+
+                const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
+                const body = { message: `Auto-sync Hopper (${shiftRecord.currentUser}): ${new Date().toLocaleString()}`, content: contentBase64, branch: GITHUB_CONFIG.branch };
+                if (latestSha) body.sha = latestSha;
+
+                const response = await fetch(url, { method: "PUT", headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json", "Accept": "application/vnd.github.v3+json" }, body: JSON.stringify(body) });
 
                 if (response.ok) {
                     const result = await response.json();
                     currentFileSha = result.content.sha;
+                    storedUsers = mergedUsers;
+                    storedMessages = mergedMessages;
+                    userRecords = mergedRecords;
+                    saveLocally();
                     updateSyncStatus("✅ Cloud Synced");
                 } else {
                     updateSyncStatus("❌ Sync Failed");
@@ -518,15 +538,29 @@
         function enterViewerMode() {
             isViewerMode = true;
             document.getElementById('role-label').innerText = "MODE:";
-            document.getElementById('display-user').innerText = "VIEWER (READ-ONLY)";
+            
+            // Find most recently updated profile to display
+            let activeTargetName = "NO ACTIVE SHIFT";
+            let latestTime = 0;
+            
+            for (let u in userRecords) {
+                if (userRecords[u].currentUser) {
+                    activeTargetName = userRecords[u].currentUser;
+                    shiftRecord = userRecords[u];
+                    break;
+                }
+            }
+
+            document.getElementById('display-user').innerText = "VIEWING: " + activeTargetName;
             document.getElementById('pdf-btn').style.display = 'none';
 
-            shiftRecord = getFreshShiftRecord("VIEWER");
+            if (!shiftRecord) {
+                shiftRecord = getFreshShiftRecord("VIEWER");
+            }
 
             document.getElementById('login-screen').style.display = 'none'; 
             document.getElementById('main-app-container').style.display = 'block'; 
             showView('main-menu');
-
             startPolling();
         }
 
@@ -544,12 +578,10 @@
                 } else if (document.getElementById('hoppers-view').style.display === 'block' && shiftRecord.uiState.blendersMode === 'single') {
                     renderSingleBlender(currentBlender);
                 }
-                
             }, 15000); 
         }
 
         function createAccount() {
-            if (isViewerMode) return;
             const rawName = document.getElementById('create-name').value.trim().toUpperCase();
             const crew = document.getElementById('create-crew').value;
             const pin = document.getElementById('create-pin').value;
@@ -566,33 +598,34 @@
             saveLocally();
             syncToGitHub(); 
             populateUserDropdown();
+            renderAdminList(); 
             
-            // Bypass login step and instantly unlock the tracker
-            isViewerMode = false;
-            const newProfile = `${rawName} (CREW ${crew})`;
-            finishLogin(newProfile);
-            
-            alert(`✅ Account created for ${rawName}. You are now securely logged in!`);
+            alert(`✅ Account created for ${rawName}. They can now be selected from the login dropdown.`);
         }
 
-        function processLogin() {
+        async function processLogin() {
             const selectedName = document.getElementById('login-name').value;
             const enteredPin = document.getElementById('login-pin').value;
             
             if (!selectedName || !storedUsers[selectedName]) { alert("Please select a name."); return; }
             if (storedUsers[selectedName].pin !== enteredPin) { alert("Invalid PIN."); return; }
+            
+            document.getElementById('btn-unlock').innerText = "LOGGING IN...";
+            document.getElementById('btn-unlock').disabled = true;
+            
+            await syncFromGitHub(); 
+            
+            const newProfile = `${selectedName} (CREW ${storedUsers[selectedName].crew})`;
 
             isViewerMode = false;
-            const newProfile = `${selectedName} (CREW ${storedUsers[selectedName].crew})`;
             finishLogin(newProfile);
         }
 
         function finishLogin(newProfile) {
-            if (!userRecords[newProfile]) {
-                userRecords[newProfile] = getFreshShiftRecord(newProfile);
-            }
-            
+            // STRICT CLEAN SLATE RULE: Every time an operator logs in, they get a fresh, blank sheet.
+            userRecords[newProfile] = getFreshShiftRecord(newProfile);
             shiftRecord = userRecords[newProfile];
+            
             document.getElementById('role-label').innerText = "OPERATOR:";
             document.getElementById('display-user').innerText = shiftRecord.currentUser; 
             document.getElementById('pdf-btn').style.display = 'block';
@@ -608,6 +641,7 @@
             
             document.getElementById('login-screen').style.display = 'none'; 
             document.getElementById('main-app-container').style.display = 'block'; 
+            unlockLoginUI();
             showView('main-menu'); 
         }
 
@@ -641,13 +675,6 @@
                 htmlStr += `<option value="${name}">${name} (CREW ${storedUsers[name].crew})</option>`; 
             });
             dropdown.innerHTML = htmlStr;
-        }
-
-        function switchLoginTab(mode) {
-            document.getElementById('tab-login').classList.toggle('active', mode === 'login');
-            document.getElementById('tab-create').classList.toggle('active', mode === 'create');
-            document.getElementById('login-view').style.display = mode === 'login' ? 'block' : 'none';
-            document.getElementById('create-view').style.display = mode === 'create' ? 'block' : 'none';
         }
 
         function openAdmin() { 
@@ -692,16 +719,32 @@
             }
         }
         
-        function processLogout() { 
+        function processLogout(silentBoot = false, skipWarning = false) { 
+            if (!silentBoot && !skipWarning && shiftRecord && !isViewerMode) {
+                if (!confirm("⚠️ WARNING: Logging out without downloading your PDF will PERMANENTLY ERASE your current setup data.\n\nAre you sure you want to discard this shift's data and log out?")) {
+                    return;
+                }
+            }
+
             if (syncInterval) clearInterval(syncInterval);
+            
+            // Clean slate wipe on explicit logout
+            if (shiftRecord && shiftRecord.currentUser && !isViewerMode) {
+                userRecords[shiftRecord.currentUser] = getFreshShiftRecord(shiftRecord.currentUser);
+            }
+            
             saveLocally();
-            syncToGitHub();
+            if (!silentBoot && !isViewerMode) syncToGitHub();
             
             document.getElementById('main-app-container').style.display = 'none'; 
             document.getElementById('login-screen').style.display = 'flex'; 
             isViewerMode = false;
             shiftRecord = null;
+            localStorage.removeItem('ralstonActiveUser_hopper');
             populateUserDropdown(); 
+            
+            document.getElementById('btn-unlock').innerText = "UNLOCK TRACKER";
+            document.getElementById('btn-unlock').disabled = false;
         }
 
         function cleanOldMessages() { 
@@ -749,13 +792,24 @@
             
             const url = `https://api.github.com/repos/${GITHUB_CONFIG.owner}/${GITHUB_CONFIG.repo}/contents/${GITHUB_CONFIG.path}`;
             try {
+                let latestSha = currentFileSha;
                 const fetchRes = await fetch(url + `?ref=${GITHUB_CONFIG.branch}`, { headers: { "Authorization": `Bearer ${token}`, "Accept": "application/vnd.github.v3+json" }});
+                
                 if (fetchRes.status === 200) {
                     const fileData = await fetchRes.json();
+                    latestSha = fileData.sha;
                     const decodedContent = decodeURIComponent(escape(atob(fileData.content)));
                     const parsed = JSON.parse(decodedContent);
                     
-                    parsed.messages = storedMessages;
+                    const allMsgs = [...(parsed.messages || []), ...storedMessages];
+                    const uniqueMsgs = [];
+                    const msgSet = new Set();
+                    allMsgs.forEach(m => {
+                        const key = m.timestamp + m.author;
+                        if (!msgSet.has(key)) { msgSet.add(key); uniqueMsgs.push(m); }
+                    });
+                    uniqueMsgs.sort((a,b) => b.timestamp - a.timestamp);
+                    parsed.messages = uniqueMsgs;
                     
                     const payload = {
                         users: parsed.users,
@@ -765,7 +819,8 @@
                     };
 
                     const contentBase64 = btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2))));
-                    const body = { message: `Viewer Message Post: ${new Date().toLocaleString()}`, content: contentBase64, branch: GITHUB_CONFIG.branch, sha: fileData.sha };
+                    const body = { message: `Viewer Message Post: ${new Date().toLocaleString()}`, content: contentBase64, branch: GITHUB_CONFIG.branch };
+                    if (latestSha) body.sha = latestSha;
 
                     const putRes = await fetch(url, { method: "PUT", headers: { "Authorization": `Bearer ${token}`, "Content-Type": "application/json", "Accept": "application/vnd.github.v3+json" }, body: JSON.stringify(body) });
                     if (putRes.ok) {
@@ -974,7 +1029,7 @@
 
             setups.forEach((setupData, index) => {
                 html += `<div class="order-card" style="border-left:5px solid #9b59b6; padding:0; overflow:hidden; margin-bottom:20px;">
-                            <h4 style="padding: 15px; background: #ecf0f1; margin: 0; color: #2c3e50; border-bottom: 2px solid #bdc3c7;">BLENDER ${blenderNum} - SETUP ${index + 1}</h4>
+                            <h4 style="padding: 15px; background: #ecf0f1; margin: 0; color: #2c3e50; border-bottom: 1px solid #bdc3c7;">BLENDER ${blenderNum} - SETUP ${index + 1}</h4>
                             <table class="blender-table">
                             <thead><tr><th style="width:70%;">SOURCE</th><th style="width:30%;">%</th></tr></thead>
                             <tbody>`;
@@ -1361,22 +1416,9 @@
             html2pdf().set(opt).from(tempContainer).save().then(() => {
                 btn.innerText = old; 
                 
-                alert("✅ BACKUP COMPLETE!\n\nYour shift data has been safely downloaded. Your board has now been wiped clean and is ready for your next shift."); 
+                alert("✅ SHIFT SAVED!\n\nYour shift data has been safely downloaded as a PDF.\n\nYou will now be logged out so the next shift can start with a completely clean slate."); 
                 
-                let activeUser = shiftRecord.currentUser;
-                userRecords[activeUser] = getFreshShiftRecord(activeUser);
-                shiftRecord = userRecords[activeUser];
-                
-                saveLocally();
-                syncToGitHub(); 
-                
-                currentLine = 1;
-                currentBlender = 1;
-                document.getElementById('line-dropdown').value = currentLine;
-                document.getElementById('blender-dropdown').value = currentBlender;
-                setMode('lines', 'single');
-                setMode('blenders', 'single');
-                showView('main-menu');
+                processLogout(false, true); 
                 
             }).catch(err => { 
                 btn.innerText = old; 
@@ -1394,6 +1436,24 @@
 
             await syncFromGitHub();
             unlockLoginUI();
+
+            const activeUser = localStorage.getItem('ralstonActiveUser_hopper');
+            if (activeUser && userRecords[activeUser]) {
+                 shiftRecord = userRecords[activeUser];
+                 cloudActiveUser = activeUser; 
+                 document.getElementById('role-label').innerText = "OPERATOR:";
+                 document.getElementById('display-user').innerText = shiftRecord.currentUser; 
+                 document.getElementById('pdf-btn').style.display = 'block';
+                 document.getElementById('login-screen').style.display = 'none'; 
+                 document.getElementById('main-app-container').style.display = 'block'; 
+                 
+                 currentLine = shiftRecord.uiState.line;
+                 currentBlender = shiftRecord.uiState.blender;
+                 document.getElementById('line-dropdown').value = currentLine;
+                 document.getElementById('blender-dropdown').value = currentBlender;
+                 showView('main-menu');
+                 startPolling();
+            }
         };
     </script>
 </body>
